@@ -42,28 +42,28 @@ reviews, reading_progress
 ![Логическая схема](путь/Логическая схема.png)
 
 ### 1. User
-![User](путь/User.png)
+![User](docs/img/User.png)
 
 ### 2. Genres
-![Genres](путь/Genres.png)
+![Genres](docs/img/Genres.png)
 
 ### 3. Books
-![Books](путь/Books.png)
+![Books](docs/img/Books.png)
 
 ### 4. Book_genres (M:N)
-![Book_genres](путь/Book_genres.png)
+![Book_genres](docs/img/Book_genres.png)
 
 ### 5. Favorites (M:N)
-![Favorites](путь/Favorites.png)
+![Favorites](docs/img/Favorites.png)
 
 ### 6. Reviews
-![Reviews](путь/Reviews.png)
+![Reviews](docs/img/Reviews.png)
 
 ### 7. Reading progress
-![Reading progress](путь/Reading_progress.png)
+![Reading progress](docs/img/Reading_progress.png)
 
 ### 8. Roles
-![Roles](путь/Roles.png)
+![Roles](docs/img/Roles.png)
 
 Роли пользователей:
 **1. Пользователь (Читатель / reader)**
