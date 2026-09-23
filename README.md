@@ -52,9 +52,11 @@ reviews, reading_progress
 
 ### 4. Book_genres (M:N)
 ![Book_genres](docs/img/Book_genres.png)
+**PRIMARY KEY (book_id, genre_id)**
 
 ### 5. Favorites (M:N)
 ![Favorites](docs/img/Favorites.png)
+**PRIMARY KEY (user_id, book_id)**
 
 ### 6. Reviews
 ![Reviews](docs/img/Reviews.png)
