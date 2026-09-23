@@ -39,7 +39,7 @@ users, roles, books, genres, book_genres (M:N), favorites (M:N),
 reviews, reading_progress
 
 ### Логическая схема
-![Логическая схема](путь/Логическая схема.png)
+![Логическая схема](docs/img/Логическая схема.png)
 
 ### 1. User
 ![User](docs/img/User.png)
