@@ -38,33 +38,32 @@
 users, roles, books, genres, book_genres (M:N), favorites (M:N),
 reviews, reading_progress
 
-![Uploading image.png…]()
+### Логическая схема
+![Логическая схема](путь/Логическая схема.png)
 
-**1 User**
-![[Pasted image 20260923131008.png]]
+### 1. User
+![User](docs/img/User.png)
 
-**2 Genres**
-![[Pasted image 20260923131016.png]]
+### 2. Genres
+![Genres](docs/img/Genres.png)
 
-**3 Books**
-![[Pasted image 20260923131031.png]]
+### 3. Books
+![Books](docs/img/Books.png)
 
-**4** **Book_genres (M:N)**
-![[Pasted image 20260923131059.png]]
-**PRIMARY KEY (book_id, genre_id)**
+### 4. Book_genres (M:N)
+![Book_genres](docs/img/Book_genres.png)
 
-**5 Favorites (M:N)**
-![[Pasted image 20260923131114.png]]
-**PRIMARY KEY (user_id, book_id)**
+### 5. Favorites (M:N)
+![Favorites](docs/img/Favorites.png)
 
-**6 Reviews**
-![[Pasted image 20260923131128.png]]
+### 6. Reviews
+![Reviews](docs/img/Reviews.png)
 
-**7 Reading progress**
-![[Pasted image 20260923131136.png]]
+### 7. Reading progress
+![Reading progress](docs/img/Reading_progress.png)
 
-**8** **Roles**
-![[Pasted image 20260923131143.png]]
+### 8. Roles
+![Roles](docs/img/Roles.png)
 
 Роли пользователей:
 **1. Пользователь (Читатель / reader)**
