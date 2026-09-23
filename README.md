@@ -38,7 +38,8 @@
 users, roles, books, genres, book_genres (M:N), favorites (M:N),
 reviews, reading_progress
 
-![[Pasted image 20260923130956.png]]
+![Uploading image.png…]()
+
 **1 User**
 ![[Pasted image 20260923131008.png]]
 
