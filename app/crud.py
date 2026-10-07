@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.models import Book, Favorite, Genre, ReadingProgress, Review, Role, User
 
 
-# ---------- Roles ----------
+# ---------- Роли ----------
 
 def create_role(session: Session, code: str, name: str, description: str | None = None) -> Role:
     obj = Role(code=code, name=name, description=description)
@@ -21,7 +21,7 @@ def list_roles(session: Session) -> list[Role]:
     return list(session.scalars(select(Role).order_by(Role.id)))
 
 
-# ---------- Users ----------
+# ---------- Пользователи ----------
 
 def create_user(
     session: Session,
@@ -77,7 +77,7 @@ def delete_user(session: Session, user_id: int) -> bool:
     return True
 
 
-# ---------- Genres ----------
+# ---------- Жанры ----------
 
 def create_genre(session: Session, name: str, description: str | None = None) -> Genre:
     obj = Genre(name=name, description=description)
@@ -182,7 +182,7 @@ def delete_book(session: Session, book_id: int) -> bool:
     return True
 
 
-# ---------- Favorites ----------
+# ---------- Избранное ----------
 
 def add_favorite(session: Session, user_id: int, book_id: int) -> Favorite:
     existing = session.get(Favorite, (user_id, book_id))
@@ -214,7 +214,7 @@ def remove_favorite(session: Session, user_id: int, book_id: int) -> bool:
     return True
 
 
-# ---------- Reviews ----------
+# ---------- Отзывы ----------
 
 def create_review(
     session: Session,
@@ -264,7 +264,7 @@ def delete_review(session: Session, review_id: int) -> bool:
     return True
 
 
-# ---------- Reading progress ----------
+# ---------- Прогресс чтения ----------
 
 def get_progress(session: Session, user_id: int, book_id: int) -> ReadingProgress | None:
     return session.get(ReadingProgress, (user_id, book_id))
