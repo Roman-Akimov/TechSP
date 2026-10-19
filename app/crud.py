@@ -21,7 +21,7 @@ def list_roles(session: Session) -> list[Role]:
     return list(session.scalars(select(Role).order_by(Role.id)))
 
 
-# ---------- Пользователи ----------
+# Пользователи 
 
 def create_user(
     session: Session,
@@ -77,7 +77,7 @@ def delete_user(session: Session, user_id: int) -> bool:
     return True
 
 
-# ---------- Жанры ----------
+# Жанры
 
 def create_genre(session: Session, name: str, description: str | None = None) -> Genre:
     obj = Genre(name=name, description=description)
@@ -114,7 +114,7 @@ def delete_genre(session: Session, genre_id: int) -> bool:
     return True
 
 
-# ---------- Books ----------
+# Книги
 
 def create_book(session: Session, **data) -> Book:
     genres = data.pop("genres", [])
@@ -182,7 +182,7 @@ def delete_book(session: Session, book_id: int) -> bool:
     return True
 
 
-# ---------- Избранное ----------
+# Избранное
 
 def add_favorite(session: Session, user_id: int, book_id: int) -> Favorite:
     existing = session.get(Favorite, (user_id, book_id))
@@ -214,7 +214,7 @@ def remove_favorite(session: Session, user_id: int, book_id: int) -> bool:
     return True
 
 
-# ---------- Отзывы ----------
+# Отзывы
 
 def create_review(
     session: Session,
@@ -264,7 +264,7 @@ def delete_review(session: Session, review_id: int) -> bool:
     return True
 
 
-# ---------- Прогресс чтения ----------
+# Прогресс чтения
 
 def get_progress(session: Session, user_id: int, book_id: int) -> ReadingProgress | None:
     return session.get(ReadingProgress, (user_id, book_id))
