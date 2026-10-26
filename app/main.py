@@ -7,7 +7,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Подключение роутеров с префиксом /api/v1 (для Nginx Reverse Proxy) и на корневом уровне
+# подключение роутеров с префиксом /api/v1 (для Nginx Reverse Proxy) и на корневом уровне
 for prefix in ("", "/api/v1"):
     app.include_router(auth.router, prefix=prefix)
     app.include_router(genres.router, prefix=prefix)
