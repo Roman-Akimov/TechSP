@@ -198,7 +198,7 @@ class ReadingProgress(Base):
 
     @property
     def percent(self) -> Decimal:
-        """Динамический расчет процента прочитанного для DTO ProgressOut."""
+        """Расчет процента прочитанного"""
         if self.book and self.book.total_pages and self.book.total_pages > 0:
             val = (Decimal(self.last_page) / Decimal(self.book.total_pages)) * Decimal(100)
             return val.quantize(Decimal("0.01"))

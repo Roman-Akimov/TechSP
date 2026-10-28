@@ -7,7 +7,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Подключение роутеров на корневом уровне и с префиксом /api/v1 (для Nginx Reverse Proxy).
+# подключение роутеров на корневом уровне и с префиксом /api/v1 для Nginx Reverse Proxy
 # include_in_schema скрывает дубликаты в сваггере
 for prefix in ("", "/api/v1"):
     show_in_docs = prefix == ""

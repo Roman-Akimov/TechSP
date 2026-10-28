@@ -13,7 +13,6 @@ security_scheme = HTTPBearer()
 
 
 def get_library_service(session: Session = Depends(get_session)) -> LibraryService:
-    """Фабрика сервиса через Dependency Injection."""
     return LibraryService(session=session)
 
 
@@ -21,7 +20,6 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
     session: Session = Depends(get_session),
 ) -> User:
-    """Извлекает и проверяет JWT-токен, возвращает ORM-модель текущего пользователя."""
     token = credentials.credentials
     try:
         payload = decode_access_token(token)
@@ -43,7 +41,6 @@ def get_current_user(
 
 
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    """Зависимость для защиты административных маршрутов (RBAC)."""
     if current_user.role.code != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
