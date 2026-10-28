@@ -4,6 +4,7 @@ from passlib.context import CryptContext
 
 from app.config import JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
+# инициализация криптографического контекста
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -15,13 +16,15 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(user_id: int, role_code: str) -> str:
+def create_access_token(user_id: int, role_code: str, login: str | None = None) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": str(user_id),
         "role": role_code,
         "exp": expire,
     }
+    if login:
+        payload["login"] = login
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 

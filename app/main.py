@@ -7,12 +7,14 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# подключение роутеров с префиксом /api/v1 (для Nginx Reverse Proxy) и на корневом уровне
+# Подключение роутеров на корневом уровне и с префиксом /api/v1 (для Nginx Reverse Proxy).
+# include_in_schema скрывает дубликаты в сваггере
 for prefix in ("", "/api/v1"):
-    app.include_router(auth.router, prefix=prefix)
-    app.include_router(genres.router, prefix=prefix)
-    app.include_router(books.router, prefix=prefix)
-    app.include_router(reader.router, prefix=prefix)
+    show_in_docs = prefix == ""
+    app.include_router(auth.router, prefix=prefix, include_in_schema=show_in_docs)
+    app.include_router(genres.router, prefix=prefix, include_in_schema=show_in_docs)
+    app.include_router(books.router, prefix=prefix, include_in_schema=show_in_docs)
+    app.include_router(reader.router, prefix=prefix, include_in_schema=show_in_docs)
 
 
 @app.get("/health", tags=["system"])

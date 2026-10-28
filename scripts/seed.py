@@ -1,11 +1,13 @@
+from sqlalchemy import select
 from app.db import SessionLocal
 from app import crud
 from app.models import Book
+from app.security import hash_password
 
 
 def seed():
     with SessionLocal() as session:
-        if session.query(Book).first():
+        if session.scalar(select(Book)):
             print("БД уже содержит книги. Seed пропущен.")
             return
 
@@ -19,14 +21,14 @@ def seed():
         reader = crud.create_user(
             session,
             "reader@example.com",
-            "demo_hash_reader",
+            hash_password("password123"),
             "Иван Петров",
             reader_role.id,
         )
         admin = crud.create_user(
             session,
             "admin@example.com",
-            "demo_hash_admin",
+            hash_password("password123"),
             "Администратор",
             admin_role.id,
         )
@@ -39,7 +41,7 @@ def seed():
             session,
             title="Марсианские хроники",
             isbn="9780000000001",
-            description="Тестовая книга для демонстрации ЛР №1.",
+            description="Тестовая книга для демонстрации.",
             publication_year=1950,
             publisher="Test Publisher",
             cover_url="https://example.com/cover1.jpg",
@@ -68,8 +70,8 @@ def seed():
 
         session.commit()
 
-        print(f"Создан читатель: {reader.id}")
-        print(f"Создан администратор: {admin.id}")
+        print(f"Создан читатель: {reader.id} (email: reader@example.com, пароль: password123)")
+        print(f"Создан администратор: {admin.id} (email: admin@example.com, пароль: password123)")
         print(f"Созданы книги: {book1.id}, {book2.id}")
 
 

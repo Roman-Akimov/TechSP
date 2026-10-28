@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from sqlalchemy import (
     BigInteger,
@@ -194,3 +195,11 @@ class ReadingProgress(Base):
 
     user: Mapped["User"] = relationship(back_populates="reading_progress")
     book: Mapped["Book"] = relationship(back_populates="reading_progress")
+
+    @property
+    def percent(self) -> Decimal:
+        """Динамический расчет процента прочитанного для DTO ProgressOut."""
+        if self.book and self.book.total_pages and self.book.total_pages > 0:
+            val = (Decimal(self.last_page) / Decimal(self.book.total_pages)) * Decimal(100)
+            return val.quantize(Decimal("0.01"))
+        return Decimal("0.00")

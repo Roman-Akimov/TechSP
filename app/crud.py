@@ -1,10 +1,10 @@
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import Book, Favorite, Genre, ReadingProgress, Review, Role, User
 
 
-# ---------- Роли ----------
+# Роли
 
 def create_role(session: Session, code: str, name: str, description: str | None = None) -> Role:
     obj = Role(code=code, name=name, description=description)
@@ -21,7 +21,7 @@ def list_roles(session: Session) -> list[Role]:
     return list(session.scalars(select(Role).order_by(Role.id)))
 
 
-# Пользователи 
+# Пользователи
 
 def create_user(
     session: Session,
@@ -46,6 +46,14 @@ def get_user(session: Session, user_id: int) -> User | None:
         select(User)
         .options(selectinload(User.role))
         .where(User.id == user_id)
+    )
+
+
+def get_user_by_email(session: Session, email: str) -> User | None:
+    return session.scalar(
+        select(User)
+        .options(selectinload(User.role))
+        .where(User.email == email)
     )
 
 
@@ -205,6 +213,19 @@ def list_favorites(session: Session, user_id: int) -> list[Favorite]:
     )
 
 
+def list_user_favorites(session: Session, user_id: int) -> list[Book]:
+    """Возвращает список книг в избранном пользователя с подгруженными жанрами."""
+    return list(
+        session.scalars(
+            select(Book)
+            .join(Favorite, Favorite.book_id == Book.id)
+            .where(Favorite.user_id == user_id)
+            .options(selectinload(Book.genres))
+            .order_by(Favorite.created_at.desc())
+        )
+    )
+
+
 def remove_favorite(session: Session, user_id: int, book_id: int) -> bool:
     obj = session.get(Favorite, (user_id, book_id))
     if obj is None:
@@ -230,6 +251,27 @@ def create_review(
         comment=comment,
     )
     session.add(obj)
+    session.flush()
+    return obj
+
+
+def upsert_review(
+    session: Session,
+    user_id: int,
+    book_id: int,
+    rating: int,
+    comment: str | None = None,
+) -> Review:
+    """Создает новый отзыв или обновляет существующий отзыв пользователя на книгу."""
+    obj = session.scalar(
+        select(Review).where(Review.user_id == user_id, Review.book_id == book_id)
+    )
+    if obj is None:
+        obj = Review(user_id=user_id, book_id=book_id, rating=rating, comment=comment)
+        session.add(obj)
+    else:
+        obj.rating = rating
+        obj.comment = comment
     session.flush()
     return obj
 
@@ -267,13 +309,17 @@ def delete_review(session: Session, review_id: int) -> bool:
 # Прогресс чтения
 
 def get_progress(session: Session, user_id: int, book_id: int) -> ReadingProgress | None:
-    return session.get(ReadingProgress, (user_id, book_id))
+    return session.scalar(
+        select(ReadingProgress)
+        .options(selectinload(ReadingProgress.book))
+        .where(ReadingProgress.user_id == user_id, ReadingProgress.book_id == book_id)
+    )
 
 
 def save_progress(
     session: Session, user_id: int, book_id: int, last_page: int
 ) -> ReadingProgress:
-    obj = session.get(ReadingProgress, (user_id, book_id))
+    obj = get_progress(session, user_id, book_id)
     if obj is None:
         obj = ReadingProgress(
             user_id=user_id, book_id=book_id, last_page=last_page
@@ -282,4 +328,4 @@ def save_progress(
     else:
         obj.last_page = last_page
     session.flush()
-    return obj
+    return get_progress(session, user_id, book_id)

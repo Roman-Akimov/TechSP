@@ -6,7 +6,6 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 # роли и пользователи
 class RoleOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
     id: int
     code: str
     name: str
@@ -70,11 +69,14 @@ class BookCreateIn(BaseModel):
 
 class BookUpdateIn(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=255)
+    isbn: str | None = Field(default=None, max_length=20)
     description: str | None = None
     publication_year: int | None = Field(default=None, ge=0, le=2100)
-    cover_url: str | None = None
-    file_url: str | None = None
+    publisher: str | None = Field(default=None, max_length=150)
+    cover_url: str | None = Field(default=None, max_length=500)
+    file_url: str | None = Field(default=None, min_length=1, max_length=500)
     total_pages: int | None = Field(default=None, gt=0)
+    language: str | None = Field(default=None, max_length=10)
     genre_ids: list[int] | None = None
 
 

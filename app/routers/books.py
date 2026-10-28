@@ -6,14 +6,20 @@ from app.services import LibraryService
 
 router = APIRouter(prefix="/books", tags=["books"])
 
-
 @router.get("", response_model=list[BookOut])
 def list_books(
     genre: str | None = Query(default=None, description="Фильтр по названию жанра"),
     language: str | None = Query(default=None, description="Фильтр по коду языка (ru, en)"),
+    publication_year: int | None = Query(default=None, description="Фильтр по году издания"),
+    search: str | None = Query(default=None, description="Поиск по части названия книги"),
     service: LibraryService = Depends(get_library_service),
 ):
-    return service.list_books(genre_name=genre, language=language)
+    return service.list_books(
+        genre_name=genre,
+        language=language,
+        publication_year=publication_year,
+        title_part=search,
+    )
 
 
 @router.get("/{book_id}", response_model=BookOut)
