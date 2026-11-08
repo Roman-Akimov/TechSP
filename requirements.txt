@@ -3,8 +3,6 @@ psycopg[binary]>=3.2,<4.0
 alembic>=1.13,<2.0
 python-dotenv>=1.0,<2.0
 pytest>=8.0,<9.0
-<<<<<<< Updated upstream
-=======
 fastapi[standard]>=0.115.0
 uvicorn[standard]>=0.30.0
 gunicorn>=22.0.0
@@ -14,7 +12,6 @@ email-validator>=2.2.0
 pyjwt>=2.9.0
 passlib[bcrypt]>=1.7.4
 bcrypt==4.0.1
-# gRPC transport and Protocol Buffers
+# gRPC
 grpcio>=1.68.0,<2.0
 protobuf>=5.28.0,<7.0
->>>>>>> Stashed changes

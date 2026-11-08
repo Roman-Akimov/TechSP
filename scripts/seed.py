@@ -1,16 +1,9 @@
-<<<<<<< Updated upstream
-from app.db import SessionLocal
-from app import crud
-from app.models import Book
-=======
-
 from sqlalchemy import select
 
 from app.db import SessionLocal
 from app import crud
 from app.models import Book, Genre, Role, User
 from app.security import hash_password
->>>>>>> Stashed changes
 
 
 def get_or_create_role(session, code, name, description):
@@ -55,21 +48,9 @@ def get_or_create_book(session, isbn, **data):
 
 def seed():
     with SessionLocal() as session:
-<<<<<<< Updated upstream
-        if session.query(Book).first():
-            print("БД уже содержит книги. Seed пропущен.")
-            return
-
-        reader_role = crud.create_role(
-            session, "reader", "Читатель", "Конечный пользователь библиотеки"
-        )
-        admin_role = crud.create_role(
-            session, "admin", "Администратор", "Управление каталогом"
-=======
         reader_role = get_or_create_role(
             session, "reader", "Читатель",
             "Конечный пользователь библиотеки"
->>>>>>> Stashed changes
         )
 
         admin_role = get_or_create_role(
@@ -80,11 +61,7 @@ def seed():
         reader = get_or_create_user(
             session,
             "reader@example.com",
-<<<<<<< Updated upstream
-            "demo_hash_reader",
-=======
             "password123",
->>>>>>> Stashed changes
             "Иван Петров",
             reader_role,
         )
@@ -92,11 +69,7 @@ def seed():
         admin = get_or_create_user(
             session,
             "admin@example.com",
-<<<<<<< Updated upstream
-            "demo_hash_admin",
-=======
             "password123",
->>>>>>> Stashed changes
             "Администратор",
             admin_role,
         )
@@ -120,12 +93,7 @@ def seed():
             session,
             "9780000000001",
             title="Марсианские хроники",
-<<<<<<< Updated upstream
-            isbn="9780000000001",
-            description="Тестовая книга для демонстрации ЛР №1.",
-=======
             description="Тестовая книга для демонстрации.",
->>>>>>> Stashed changes
             publication_year=1950,
             publisher="Test Publisher",
             cover_url="https://example.com/cover1.jpg",
@@ -159,18 +127,12 @@ def seed():
 
         session.commit()
 
-<<<<<<< Updated upstream
-        print(f"Создан читатель: {reader.id}")
-        print(f"Создан администратор: {admin.id}")
-        print(f"Созданы книги: {book1.id}, {book2.id}")
-=======
         print("========== SEED COMPLETED ==========")
         print(f"Reader: {reader.email}, ID: {reader.id}")
         print(f"Admin: {admin.email}, ID: {admin.id}")
         print(f"Books: {book1.title}, {book2.title}")
         print("Genres, favorites, progress and reviews ready.")
         print("====================================")
->>>>>>> Stashed changes
 
 
 if __name__ == "__main__":

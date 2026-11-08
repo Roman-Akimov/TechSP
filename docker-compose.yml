@@ -16,8 +16,6 @@ services:
       timeout: 5s
       retries: 10
 
-<<<<<<< Updated upstream
-=======
   api:
     build: .
     container_name: library_api
@@ -57,6 +55,5 @@ services:
     depends_on:
       - api
 
->>>>>>> Stashed changes
 volumes:
   postgres_data:
