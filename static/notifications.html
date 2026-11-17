@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЧитайГород — уведомления</title>
+<style>
+body{font:16px Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 18px;background:#f5f6fa;color:#202435}
+.card{background:white;padding:22px;border-radius:12px;box-shadow:0 2px 12px #0001}
+input,button{padding:10px;font-size:15px;margin:5px 4px 12px 0}button{cursor:pointer}
+#status{font-weight:bold}.notice{padding:12px;margin:10px 0;background:#e9f5ff;border-left:4px solid #2684d9;border-radius:5px}
+small{color:#667}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Клиент уведомлений</h1>
+<p>Укажи ID пользователя из таблицы users и подключись к Notification Service.</p>
+<label>ID пользователя: <input id="userId" type="number" min="1" value="1"></label>
+<button id="connect">Подключиться</button><button id="disconnect" disabled>Отключиться</button>
+<p>Статус: <span id="status">не подключено</span></p>
+<h2>Полученные уведомления</h2><div id="messages"><small>Пока уведомлений нет.</small></div>
+</div>
+<script>
+let socket;
+const statusEl=document.getElementById('status');
+document.getElementById('connect').onclick=()=>{
+  if(socket && socket.readyState===WebSocket.OPEN) return;
+  const id=document.getElementById('userId').value;
+  const scheme=location.protocol==='https:'?'wss':'ws';
+  socket=new WebSocket(`${scheme}://localhost:8001/ws/${id}`);
+  socket.onopen=()=>{statusEl.textContent='подключено';document.getElementById('connect').disabled=true;document.getElementById('disconnect').disabled=false;};
+  socket.onmessage=(event)=>{
+    const data=JSON.parse(event.data);
+    const div=document.createElement('div');div.className='notice';
+    const title=document.createElement('strong');title.textContent=data.title||'Уведомление';
+    const message=document.createElement('p');message.textContent=data.message||event.data;
+    const time=document.createElement('small');time.textContent=data.created_at||'';
+    div.append(title,message,time);document.getElementById('messages').prepend(div);
+  };
+  socket.onclose=()=>{statusEl.textContent='отключено';document.getElementById('connect').disabled=false;document.getElementById('disconnect').disabled=true;};
+  socket.onerror=()=>{statusEl.textContent='ошибка соединения';};
+};
+document.getElementById('disconnect').onclick=()=>{if(socket)socket.close();};
+</script>
+</body></html>

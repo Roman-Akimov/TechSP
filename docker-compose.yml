@@ -17,6 +17,41 @@ services:
       timeout: 3s
       retries: 10
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: library_rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  grpc:
+    build: .
+    container_name: library_grpc
+    restart: unless-stopped
+    command: python -m grpc_service.server
+    ports:
+      - "50051:50051"
+
+  notification:
+    build: .
+    container_name: library_notification
+    restart: unless-stopped
+    command: uvicorn notification_service.main:app --host 0.0.0.0 --port 8001
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/%2F
+      RABBITMQ_QUEUE: library_events
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8001:8001"
+
   api:
     build: .
     container_name: library_api
@@ -24,8 +59,15 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://library:library@db:5432/library_db
       JWT_SECRET_KEY: super-secret-library-jwt-key-2026
+      GRPC_RECOMMENDATION_TARGET: grpc:50051
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/%2F
+      RABBITMQ_QUEUE: library_events
     depends_on:
       db:
+        condition: service_healthy
+      grpc:
+        condition: service_started
+      rabbitmq:
         condition: service_healthy
     command: >
       sh -c "alembic upgrade head &&

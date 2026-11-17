@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Response, status, HTTPException
 from app.dependencies import get_library_service, get_current_user
 from app.models import User
 from app.schemas import (
@@ -9,6 +9,16 @@ from app.schemas import (
     ReviewOut,
 )
 from app.services import LibraryService
+from app.db import get_session
+from app.models import Book, BookGenre, Favorite, Review
+from app.grpc_client import get_recommendations
+from app.messaging import publish_event
+from sqlalchemy import select, func
+from sqlalchemy.orm import Session, selectinload
+import grpc
+import logging
+
+log = logging.getLogger("library-api")
 
 router = APIRouter(tags=["reader-actions"])
 
@@ -21,14 +31,40 @@ def get_my_favorites(
     return service.get_user_favorites(current_user.id)
 
 
+
 @router.post("/favorites/{book_id}", status_code=status.HTTP_201_CREATED)
 def add_favorite(
     book_id: int,
     current_user: User = Depends(get_current_user),
     service: LibraryService = Depends(get_library_service),
 ):
+    # Получаем информацию о книге
+    book = service.get_book_or_404(book_id)
+
+    # Сохраняем книгу в избранное
     service.add_to_favorites(current_user.id, book_id)
-    return {"message": "Книга добавлена в избранное", "book_id": book_id}
+
+    # Публикуем событие в RabbitMQ
+    publish_event(
+        event_type="favorite_added",
+        user_id=current_user.id,
+        payload={
+            "book_id": book.id,
+            "book_title": book.title,
+        },
+    )
+
+    log.info(
+        "[API] Пользователь %s добавил книгу '%s' в избранное",
+        current_user.id,
+        book.title,
+    )
+
+    return {
+        "message": "Книга добавлена в избранное",
+        "book_id": book_id,
+    }
+
 
 
 @router.delete("/favorites/{book_id}")
@@ -86,3 +122,81 @@ def delete_my_review(
 ):
     service.delete_user_review(current_user.id, book_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.get("/recommendations")
+def get_recommended_books(
+    limit: int = 10,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    """Персональные рекомендации, ранжируемые отдельным gRPC-микросервисом."""
+    limit = max(1, min(limit, 50))
+    log.info("[API] Пользователь %s запросил рекомендации", current_user.id)
+
+    favorite_rows = session.execute(
+        select(Favorite.book_id).where(Favorite.user_id == current_user.id)
+    ).all()
+    favorite_ids = [row[0] for row in favorite_rows]
+
+    preferred_genre_ids = set()
+    if favorite_ids:
+        genre_rows = session.execute(
+            select(BookGenre.genre_id).where(BookGenre.book_id.in_(favorite_ids))
+        ).all()
+        preferred_genre_ids.update(row[0] for row in genre_rows)
+
+    stmt = select(Book).options(selectinload(Book.genres)).order_by(Book.id)
+    if favorite_ids:
+        stmt = stmt.where(~Book.id.in_(favorite_ids))
+    books = list(session.scalars(stmt).all())
+
+    rating_rows = session.execute(
+        select(Review.book_id, func.avg(Review.rating))
+        .group_by(Review.book_id)
+    ).all()
+    ratings = {book_id: float(avg_rating) for book_id, avg_rating in rating_rows}
+
+    candidates = [
+        {
+            "id": book.id,
+            "title": book.title,
+            "genre_ids": [genre.id for genre in book.genres],
+            "average_rating": ratings.get(book.id, 0.0),
+        }
+        for book in books
+    ]
+    try:
+        recommendations = get_recommendations(
+            sorted(preferred_genre_ids), candidates, limit
+        )
+    except grpc.RpcError as exc:
+        log.exception("[API] Ошибка обращения к gRPC-сервису")
+        raise HTTPException(
+            status_code=503,
+            detail="Сервис рекомендаций временно недоступен",
+        ) from exc
+
+    result = []
+    for recommendation in recommendations:
+        book = next((item for item in books if item.id == recommendation["id"]), None)
+        if book:
+            result.append({
+                "book": {
+                    "id": book.id,
+                    "title": book.title,
+                    "description": book.description,
+                    "publication_year": book.publication_year,
+                    "publisher": book.publisher,
+                    "cover_url": book.cover_url,
+                    "file_url": book.file_url,
+                    "total_pages": book.total_pages,
+                    "language": book.language,
+                    "genres": [{"id": g.id, "name": g.name, "description": g.description}
+                               for g in book.genres],
+                },
+                "score": recommendation["score"],
+                "reason": recommendation["reason"],
+            })
+    log.info("[API] Пользователю %s возвращено рекомендаций: %d",
+             current_user.id, len(result))
+    return {"user_id": current_user.id, "recommendations": result}

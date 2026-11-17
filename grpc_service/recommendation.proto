@@ -1,0 +1,30 @@
+syntax = "proto3";
+package library.recommendations;
+
+service RecommendationService {
+  rpc GetRecommendations (RecommendationRequest) returns (RecommendationResponse);
+}
+
+message CandidateBook {
+  int64 id = 1;
+  string title = 2;
+  repeated int64 genre_ids = 3;
+  double average_rating = 4;
+}
+
+message RecommendationRequest {
+  repeated int64 preferred_genre_ids = 1;
+  repeated CandidateBook candidates = 2;
+  int32 limit = 3;
+}
+
+message RecommendedBook {
+  int64 id = 1;
+  string title = 2;
+  double score = 3;
+  string reason = 4;
+}
+
+message RecommendationResponse {
+  repeated RecommendedBook recommendations = 1;
+}
